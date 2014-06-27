@@ -1,0 +1,17 @@
+.header
+  ul.nav.nav-pills.pull-right
+    li.active
+      a(ng-href='#') Home
+    li
+      a(ng-href='#') About
+    li
+      a(ng-href='#') Contact
+  h3.text-muted cybFileBrowser
+
+.row
+  div(cyb-file-browser='', files="listOfFiles", on-select="fileSelected(fileInfo)", show-root-title='false')
+
+.footer
+  p
+    span.glyphicon.glyphicon-heart
+    | from Christian Dannie Storgaard (Cybolic)

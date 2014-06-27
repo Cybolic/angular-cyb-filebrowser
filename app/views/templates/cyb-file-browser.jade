@@ -1,0 +1,80 @@
+.row-fluid.filechooser
+  .row-fluid
+    ul.breadcrumb
+      li.muted Selected:&nbsp;&nbsp;
+      li(ng-click='select("")')
+        span {{rootTitle}}
+      li(ng-repeat="part in currentPathSegments", ng-click="part.isDir && select(part.name+'/')", ng-class="{selectable: part.isDir}")
+        | {{part.name}}
+  .row-fluid
+    .col-md-12.thumbnail(ng-class="{'col-md-9': allowCreate}")
+      .row-fluid
+        .col-md-4.filelist(ng-repeat='files in currentFiles', ng-class="'column'+{{$index+1}}")
+          ul.list-unstyled
+            li.ellipsis(ng-repeat="file in files", ng-click='select(file.path)', ng-class="{selected: file.isOpen, selected: file.path == currentFile}")
+              span.item-icon(ng-class="file.isDir && (file.isOpen && folderOpenIcon || folderClosedIcon) || ''")
+              span {{file.name}}
+              span.pull-right.directory-indicator(ng-show="file.isDir", ng-class="foldoutIcon")
+            li(ng-show='files.length == 0')
+              span.muted No files
+
+      .row-fluid.btn-row
+        button.pull-right(ng-click='openAddDir()', ng-show="allowCreate")
+          | Create Directory
+
+    .col-md-3.thumbnail(ng-show="allowCreate")
+      form.no-margins(name='upload', action='/upload', ng-upload='ng-upload')
+        input(type='hidden', name='appid', value='{{app.uid}}')
+        input(type='hidden', name='path', value='/{{currentDir}}')
+        input(type='hidden', name='replacepath', value='{{currentFile}}')
+        input(type='hidden', name='replace', value='{{uploadReplace}}')
+        .row-fluid
+          .col-md-12
+            ul.list-unstyled
+              li(ng-repeat='file in filesToUpload')
+                | {{file.name}}
+            div(upload-button, name='uploaded_file', button-class='btn', files-model='filesToUpload')
+              | Select file to upload
+        .row-fluid.btn-row
+          .col-md-12
+            button.col-md-12(type='submit', value='Upload files', upload-submit='uploadDone(content, completed)', ng-class="{'disabled': !filesToUpload.length}", ng-disabled="!filesToUpload.length")
+              i.icon.upload
+              | Upload file
+
+  .row-fluid
+    h3 Preview:&nbsp;
+      span.preview-filename {{currentFileName}}
+  .row-fluid
+    .col-md-12.thumbnail
+      ul.list-unstyled.file-preview
+        li(ng-show="currentFileName")
+          img.transparency(ng-src="{{fileIcon()}}")
+  .row-fluid.btn-row
+    .btn-group.pull-right
+      a.btn(ng-href="{{currentFileURI}}/false/true", ng-class="{'disabled': !currentFileName}", ng-show="allowRead")
+        i.icon-download
+        | &nbsp;Download file
+      a.btn(ng-href="{{currentFileURI}}/false/false", ng-class="{'disabled': !currentFileName}", target="_blank", ng-show="allowRead")
+        i.icon-external-link
+        | &nbsp;Open in new tab
+      button.btn(ng-click="uploadReplacement()", ng-class="{'disabled': !currentFileName}", ng-show="allowUpdate")
+        i.icon-undo
+        | &nbsp;Replace this file
+      button.btn(ng-click="deleteFile()", ng-class="{'disabled': !currentFileName}", ng-show="allowDelete")
+        i.icon-remove
+        | &nbsp;Delete this file
+
+
+
+
+div(modal='addDirOpen', close='closeAddDir()', options='{dialogFade: true}')
+  form.form-horizontal(name="addDir", ng-submit='runAddDir()')
+    .modal-header
+      h4 Create new directory
+    .modal-body
+      .control-group
+        label.control-label(for="name") Name:
+        .controls: input(name="name", type="text", ng-model="addDirName", ng-minlength="1", required, focus)
+    .modal-footer
+      button.pull-left(ng-disabled="addDir.$invalid", ng-class="{disabled: addDir.$invalid}") Create Directory
+      button.pull-right(ng-click='closeAddDir()') Cancel
